@@ -2,7 +2,7 @@ from models import Service
 import pytest
 from pydantic import ValidationError
 from sqlmodel import SQLModel, Session, create_engine
-import schema 
+from schema import schema 
 
 @pytest.fixture
 def test_db_session():
@@ -27,7 +27,7 @@ def test_graphql(test_db_session):
         }
     """
     
-    rez = test_db_session.execute_sync(
+    rez = schema.execute_sync(
         query,  
         variable_values = {"id": service.id},
         context_value = {"session": test_db_session}
