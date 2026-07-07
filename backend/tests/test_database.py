@@ -15,5 +15,6 @@ def test_incident():
     
 def test_incident_fails():
     with pytest.raises(ValidationError):
-        Incident()
+        invalid_data = {"resolved": False} 
+        Incident.model_validate(invalid_data)
         
