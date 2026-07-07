@@ -33,6 +33,6 @@ def test_graphql(test_db_session):
         context_value = {"session": test_db_session}
     )
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
-    result = rez.data["getServiceId"]
+    result = rez.data["serviceById"]
     assert result["name"] == "Baza de date", "Serviciul nu are acelasi nume"
     assert result["status"] == "active", "Serviciul nu are acelasi status"
