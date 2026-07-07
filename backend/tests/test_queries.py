@@ -29,7 +29,7 @@ def test_graphql(test_db_session):
     
     rez = schema.execute_sync(
         query,  
-        variable_values = {"id": service.id},
+        variable_values = {"service_id": service.id},
         context_value = {"session": test_db_session}
     )
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
