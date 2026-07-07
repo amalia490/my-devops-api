@@ -19,8 +19,8 @@ def test_graphql(test_db_session):
     test_db_session.refresh(service)
     
     query = """
-        query getServiceTest($id: Int!){
-            serviceById(id: $id){
+        query getServiceTest($service_id: Int!){
+            serviceById(service_id: $service_id){
                 name
                 status
             }
