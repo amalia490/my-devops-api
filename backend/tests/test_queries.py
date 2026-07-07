@@ -27,7 +27,7 @@ def test_graphql(test_db_session):
         }
     """
     
-    rez = schema.execute_sync(
+    rez = test_db_session.execute_sync(
         query,  
         variable_values = {"id": service.id},
         context_value = {"session": test_db_session}
