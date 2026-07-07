@@ -19,8 +19,8 @@ def test_graphql(test_db_session):
     test_db_session.refresh(service)
     
     query = """
-        query getServiceTest($service_id: Int!){
-            serviceById(service_id: $service_id){
+        query getServiceTest($serviceId: Int!){
+            serviceById(serviceId: $serviceId){
                 name
                 status
             }
@@ -29,7 +29,7 @@ def test_graphql(test_db_session):
     
     rez = schema.execute_sync(
         query,  
-        variable_values = {"service_id": service.id},
+        variable_values = {"serviceId": service.id},
         context_value = {"session": test_db_session}
     )
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
