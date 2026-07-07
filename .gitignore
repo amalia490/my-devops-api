@@ -4,9 +4,15 @@
 *.key
 .venv/
 venv/
+env/
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+htmlcov/
+*.db
+*.sqlite
+*.sqlite3
 alembic.ini
 .vscode/

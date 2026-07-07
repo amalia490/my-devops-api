@@ -34,9 +34,9 @@ graphql_app = GraphQLRouter(
     context_getter=get_context 
 )
 
-app.include_router(graphql_app, prefix="/graphql")
-
-#ruta de baza
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Hello DevOps! Aplicatia functioneaza."}
+
+
+app.include_router(graphql_app, prefix="/graphql")

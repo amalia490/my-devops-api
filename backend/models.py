@@ -17,5 +17,7 @@ class Service(SQLModel, table=True):
 class Incident(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     service_id: int | None = Field(default=None, foreign_key = "service.id")
+    description: str
+    resolved: bool
     service: Optional[Service] = Relationship(back_populates="incidents")
 
