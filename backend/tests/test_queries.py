@@ -20,7 +20,7 @@ def test_graphql(test_db_session):
     
     query = """
         query getServiceTest($id: Int!){
-            getServiceId(id: $id){
+            serviceById(id: $id){
                 name
                 status
             }
@@ -32,8 +32,7 @@ def test_graphql(test_db_session):
         variable_values = {"id": service.id},
         context_value = {"session": test_db_session}
     )
-    
-    result = rez.data["getServiceId"]
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
+    result = rez.data["getServiceId"]
     assert result["name"] == "Baza de date", "Serviciul nu are acelasi nume"
     assert result["status"] == "active", "Serviciul nu are acelasi status"
