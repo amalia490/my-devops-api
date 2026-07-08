@@ -1,33 +1,52 @@
-# End-to-End DevOps Pipeline: Microservice with CI/CD & IaC
+# End-to-End DevOps Pipeline: GraphQL Microservice cu CI/CD & IaC
 
-This repository demonstrates a complete, automated DevOps lifecycle for a modern microservice. It showcases the integration of containerization, continuous integration/continuous deployment (CI/CD), and Infrastructure as Code (IaC) to deliver a reliable and scalable application.
+>  **Proiect în derulare (Work in Progress):** Acest proiect se află în dezvoltare activă. În prezent mă concentrez pe implementarea și securizarea infrastructurii serverului (AWS/Terraform) conform celor mai bune practici de securitate, precum și pe dezvoltarea aplicației de **Frontend** care va consuma acest API.
 
-## 🚀 Architecture & Workflow
+Acest repository demonstrează un ciclu complet și automatizat de DevOps pentru o aplicație modernă. Proiectul ilustrează integrarea containerizării, a fluxurilor de CI/CD și a conceptului de Infrastructure as Code (IaC) pentru a livra o aplicație scalabilă, testată și robustă.
 
-1. **Application:** A lightweight REST API built with Python and FastAPI.
-2. **Containerization:** The application is packaged using a multi-stage `Dockerfile` for consistency across environments.
-3. **CI/CD Pipeline:** GitHub Actions automatically triggers on every push to the `main` branch. It runs automated tests (pytest), builds the Docker image, and pushes it to Docker Hub.
-4. **Infrastructure as Code (IaC):** Terraform scripts are used to provision an AWS EC2 instance, configure security groups, and automatically deploy the containerized application upon server initialization.
+##  Arhitectură & Flux de Lucru
 
-## 🛠️ Technologies Used
+* **Aplicație Backend:** Un API robust construit cu Python, **FastAPI** și **GraphQL** (via Strawberry). Datele sunt gestionate prin **SQLModel** și stocate într-o bază de date PostgreSQL, versiunile schemei fiind controlate prin migrații automate cu **Alembic**.
+* **Arhitectură Monorepo:** Codul este împărțit logic în foldere independente pentru `backend` și `frontend` (în curs de dezvoltare).
+* **Containerizare:** Componentele sunt împachetate folosind Docker (cu fișiere Dockerfile multi-stage) pentru a asigura rularea identică în orice mediu (Local, Testare, Producție).
+* **CI/CD Pipeline:** GitHub Actions declanșează automat un pipeline la fiecare push pe ramura `main`. Acest robot creează baze de date de test în memorie (SQLite), rulează testele automate (`pytest`), construiește imaginea de Docker și o trimite către Docker Hub.
+* **Infrastructure as Code (IaC):** Scripturile Terraform sunt utilizate pentru a proviziona infrastructura în AWS (EC2), a configura Security Groups și a asigura un mediu sigur și reproductibil pentru deploy.
 
-* **Code & Framework:** Python 3.11, FastAPI
-* **Testing:** Pytest
-* **Containerization:** Docker
+##  Tehnologii Utilizate
+
+**Backend & Baze de Date:**
+* **Limbaj & Framework:** Python 3.11, FastAPI
+* **API:** GraphQL (Strawberry)
+* **Bază de date & ORM:** PostgreSQL, SQLModel
+* **Migrații:** Alembic
+* **Testare:** Pytest (cu baze de date in-memory izolate)
+
+**DevOps & Infrastructură:**
+* **Containerizare:** Docker & Docker Compose
 * **CI/CD:** GitHub Actions
 * **Infrastructure as Code:** Terraform
 * **Cloud Provider:** AWS (Amazon Web Services)
 * **Container Registry:** Docker Hub
 
-## 📂 Project Structure
+##  Structura Proiectului
 
 ```text
 .
 ├── .github/workflows/
-│   └── ci-cd.yml          # GitHub Actions pipeline configuration
-├── main.py                # FastAPI application source code
-├── test_main.py           # Automated unit tests
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Docker image configuration
-├── main.tf                # Terraform infrastructure script
-└── README.md              # Project documentation
+│   └── ci-cd.yml              # Configurația pipeline-ului GitHub Actions
+├── backend/
+│   ├── alembic/               # Scripturile de migrare a bazei de date
+│   ├── tests/                 # Testele unitare și de integrare (Pytest)
+│   ├── main.py                # Punctul de intrare pentru aplicația FastAPI
+│   ├── schema.py              # Schema și resolverele GraphQL (Strawberry)
+│   ├── models.py              # Modelele bazei de date (SQLModel)
+│   ├── db.py                  # Conexiunea la PostgreSQL
+│   ├── alembic.ini            # Configurația pentru migrații
+│   ├── requirements.txt       # Dependențele Python
+│   └── Dockerfile             # Fișierul de build Docker pentru backend
+├── frontend/                  #  WIP: Aplicația de frontend (Node.js/React etc.)
+├── infra/                     
+│   └── main.tf                # Scriptul de infrastructură Terraform (AWS)
+├── docker-compose.yml         # Orchestarea locală (Backend + Baza de date)
+├── .gitignore                 # Excluderi pentru secrete și cache
+└── README.md                  # Documentația proiectului
