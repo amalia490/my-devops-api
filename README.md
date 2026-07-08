@@ -1,10 +1,9 @@
 # End-to-End DevOps Pipeline: GraphQL Microservice with CI/CD & IaC
 
-> ⚠️ **Proiect în derulare (Work in Progress):** Acest proiect se află în dezvoltare activă. În prezent mă concentrez pe:
-> * **Optimizarea Performanței:** Implementarea unui layer de **DataLoader** pentru a eficientiza interogările GraphQL și a elimina problema N+1.
-> * **Infrastructură & Securitate:** Configurarea finală a mediului AWS (Terraform) conform celor mai bune practici.
-> * **Frontend:** Dezvoltarea aplicației client care va consuma acest API.
-This repository demonstrates a complete and automated DevOps lifecycle for a modern application. The project illustrates the integration of containerization, Continuous Integration/Continuous Deployment (CI/CD) workflows, and Infrastructure as Code (IaC) to deliver a scalable, tested, and robust application.
+> ⚠️ **Work in Progress (WIP):** This project is under active development. My current focus areas include:
+> * **Performance Optimization:** Implementing a **DataLoader** layer to batch and cache GraphQL queries, effectively eliminating the N+1 problem.
+> * **Infrastructure & Security:** Finalizing the AWS server provisioning (Terraform) following security best practices.
+> * **Frontend:** Developing the client-side application that will consume this API.
 
 ##  Architecture & Workflow
 
