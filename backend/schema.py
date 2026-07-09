@@ -1,9 +1,12 @@
+from collections import defaultdict
 import typing
 import strawberry
 from strawberry.types import Info
 from sqlmodel import select
 from typing import Optional
 from models import User as UserModel, Service as ServiceModel, Incident as IncidentModel
+from typing import List
+from strawberry.dataloader import DataLoader
 
 @strawberry.type
 class User:
@@ -12,17 +15,22 @@ class User:
     created_at: str
     
 @strawberry.type
-class Service:
-    id: int
-    name: str
-    status: str
-    
-@strawberry.type
 class Incident:
     id: int
     service_id: int
     description: str
     resolved: bool
+    
+@strawberry.type
+class Service:
+    id: int
+    name: str
+    status: str
+    
+    @strawberry.field
+    #resolver pentru campul 'incidents'
+    async def incidents(self, info: Info) -> List[Incident]:
+        return await info.context["incidents_loader"].load(self.id)
     
 @strawberry.input
 class ServiceUpdateInput:
@@ -39,7 +47,6 @@ class IncidentUpdateInput:
     service_id: Optional[int] = None
     description: Optional[str] = None
     resolved: Optional[bool] = None 
-
     
 def get_users(info: Info):
     session = info.context["session"]
@@ -53,9 +60,10 @@ def get_service(info: Info):
     session = info.context["session"]
     return session.exec(select(ServiceModel)).all()
      
-def get_service_id(info: Info, service_id: int):
+def get_services_id(info: Info, service_ids: List[int]) -> List[Service]:
     session = info.context["session"]
-    return session.get(ServiceModel, service_id)
+    statement = select(ServiceModel).where(ServiceModel.id.in_(service_ids))
+    return session.exec(statement).all()
 
 def get_incidents(info: Info):
     session = info.context["session"]
@@ -70,10 +78,9 @@ class Query:
     users: typing.List[User] = strawberry.field(resolver=get_users)
     user_by_id: User = strawberry.field(resolver=get_user_id)
     services: typing.List[Service]= strawberry.field(resolver=get_service)
-    service_by_id: Service = strawberry.field(resolver=get_service_id)
+    services_by_id: List[Service] = strawberry.field(resolver=get_services_id)
     incidents: typing.List[Incident]= strawberry.field(resolver=get_incidents)
-    incident_by_id: Incident = strawberry.field(resolver=get_incident_id)
-    
+    incident_by_id: Incident = strawberry.field(resolver=get_incident_id)    
 
 @strawberry.type
 class Mutation:
@@ -201,5 +208,6 @@ class Mutation:
 
         session.commit()
         return True
+
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

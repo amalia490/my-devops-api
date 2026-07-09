@@ -19,8 +19,8 @@ def test_graphql(test_db_session):
     test_db_session.refresh(service)
     
     query = """
-        query getServiceTest($serviceId: Int!){
-            serviceById(serviceId: $serviceId){
+        query getServiceTest($serviceIds: [Int!]!){
+            servicesById(serviceIds: $serviceIds){
                 name
                 status
             }
@@ -29,10 +29,10 @@ def test_graphql(test_db_session):
     
     rez = schema.execute_sync(
         query,  
-        variable_values = {"serviceId": service.id},
+        variable_values = {"serviceIds": [service.id]},
         context_value = {"session": test_db_session}
     )
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
-    result = rez.data["serviceById"]
-    assert result["name"] == "Baza de date", "Serviciul nu are acelasi nume"
-    assert result["status"] == "active", "Serviciul nu are acelasi status"
+    result = rez.data["servicesById"]
+    assert result[0]["name"] == "Baza de date", "Serviciul nu are acelasi nume"
+    assert result[0]["status"] == "active", "Serviciul nu are acelasi status"
