@@ -4,207 +4,226 @@ import strawberry
 from strawberry.types import Info
 from sqlmodel import select
 from typing import Optional
-from models import User as UserModel, Service as ServiceModel, Incident as IncidentModel
+from models import Subscriber as SubscriberModel, NewsSource as NewsSourceModel, Article as ArticleModel
 from typing import List
 from strawberry.dataloader import DataLoader
 
 @strawberry.type
-class User:
+class Subscriber:
     id: int
     email: str
-    created_at: str
+    is_active: bool
     
 @strawberry.type
-class Incident:
+class Article:
     id: int
-    service_id: int
+    title: str
+    link: str
+    source_id: int
     description: str
-    resolved: bool
+    date: str 
     
 @strawberry.type
-class Service:
+class NewsSource:
     id: int
     name: str
-    status: str
+    url: str
+    category: str
     
     @strawberry.field
-    #resolver pentru campul 'incidents'
-    async def incidents(self, info: Info) -> List[Incident]:
-        return await info.context["incidents_loader"].load(self.id)
+    #resolver pentru campul 'Articles'
+    async def Articles(self, info: Info) -> List[Article]:
+        return await info.context["Articles_loader"].load(self.id)
     
 @strawberry.input
-class ServiceUpdateInput:
+class NewsSourceUpdateInput:
     name: Optional[str] = None
-    status: Optional[str] = None
+    url: Optional[str] = None
+    category: Optional[str] = None
     
 @strawberry.input
-class UserUpdateInput:
+class SubscriberUpdateInput:
     email: Optional[str] = None
-    created_at: Optional[str] = None
+    is_active: Optional[bool] = None
 
 @strawberry.input
-class IncidentUpdateInput:
-    service_id: Optional[int] = None
+class ArticleUpdateInput:
+    title: Optional[str] = None
+    link: Optional[str] = None
+    date: Optional[str] = None
+    NewsSource_id: Optional[int] = None
     description: Optional[str] = None
-    resolved: Optional[bool] = None 
     
-def get_users(info: Info):
+def get_Subscribers(info: Info):
     session = info.context["session"]
-    return session.exec(select(UserModel)).all()
+    return session.exec(select(SubscriberModel)).all()
 
-def get_user_id(info: Info, user_id: int):
+def get_Subscriber_id(info: Info, Subscriber_id: int):
     session = info.context["session"]
-    return session.get(UserModel, user_id)
+    return session.get(SubscriberModel, Subscriber_id)
 
-def get_service(info: Info):
+def get_NewsSource(info: Info):
     session = info.context["session"]
-    return session.exec(select(ServiceModel)).all()
+    return session.exec(select(NewsSourceModel)).all()
      
-def get_services_id(info: Info, service_ids: List[int]) -> List[Service]:
+def get_NewsSources_id(info: Info, NewsSource_id: int) -> NewsSource:
     session = info.context["session"]
-    statement = select(ServiceModel).where(ServiceModel.id.in_(service_ids))
-    return session.exec(statement).all()
+    return session.get(NewsSourceModel, NewsSource_id)
 
-def get_incidents(info: Info):
+def get_Articles(info: Info):
     session = info.context["session"]
-    return session.exec(select(IncidentModel)).all()
+    return session.exec(select(ArticleModel)).all()
     
-def get_incident_id(info: Info, incident_id: int):
+def get_Article_id(info: Info, Article_id: int):
     session = info.context["session"]
-    return session.get(IncidentModel, incident_id)
+    return session.get(ArticleModel, Article_id)
 
 @strawberry.type
 class Query:
-    users: typing.List[User] = strawberry.field(resolver=get_users)
-    user_by_id: User = strawberry.field(resolver=get_user_id)
-    services: typing.List[Service]= strawberry.field(resolver=get_service)
-    services_by_id: List[Service] = strawberry.field(resolver=get_services_id)
-    incidents: typing.List[Incident]= strawberry.field(resolver=get_incidents)
-    incident_by_id: Incident = strawberry.field(resolver=get_incident_id)    
+    Subscribers: typing.List[Subscriber] = strawberry.field(resolver=get_Subscribers)
+    Subscriber_by_id: Subscriber = strawberry.field(resolver=get_Subscriber_id)
+    NewsSources: typing.List[NewsSource]= strawberry.field(resolver=get_NewsSource)
+    NewsSources_by_id: NewsSource = strawberry.field(resolver=get_NewsSources_id)
+    Articles: typing.List[Article]= strawberry.field(resolver=get_Articles)
+    Article_by_id: Article = strawberry.field(resolver=get_Article_id)    
 
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    def add_user(self, info:Info, email:str, created_at:str) -> User:
+    def add_Subscriber(self, info:Info, email:str, is_active:bool) -> str:
         session = info.context["session"]
-        new_user = UserModel(email=email, created_at = created_at)
-        session.add(new_user)
+        sbc_exista = session.exec(
+                select(SubscriberModel).where(SubscriberModel.email == email)
+            ).first()
+            
+        if sbc_exista:
+            if not sbc_exista.is_active:
+                sbc_exista.is_active = True
+                session.add(sbc_exista)
+                session.commit()
+                return "Te-ai reabonat cu succes la alerte!"
+            return "Esti deja abonat la alertele noastre!"
+            
+        new_Subscriber = SubscriberModel(email=email, is_active = is_active)
+        session.add(new_Subscriber)
         session.commit()
         
-        session.refresh(new_user)
+        session.refresh(new_Subscriber)
         
-        return new_user
+        return "Te-ai abonat cu succes la alerte!"
     
     @strawberry.mutation
-    def add_service(self, info: Info, name:str, status:str) -> Service:
+    def add_NewsSource(self, info: Info, name:str, url:str, category:str) -> NewsSource:
         session = info.context["session"]
-        new_service = ServiceModel(name=name, status=status)
-        session.add(new_service)
+        new_NewsSource = NewsSourceModel(name=name, url=url, category= category)
+        session.add(new_NewsSource)
         session.commit()
         
-        session.refresh(new_service)
+        session.refresh(new_NewsSource)
         
-        return new_service
+        return new_NewsSource
     
     @strawberry.mutation
-    def add_incident(self, info:Info, service_id:int, description:str, resolved:bool) -> Incident:
+    def add_Article(self, info:Info, NewsSource_id:int, description:str, title:str, link:str, date:str) -> Article:
         session = info.context["session"]
-        new_incident = IncidentModel(service_id = service_id, description = description, resolved = resolved)
-        session.add(new_incident)
+        new_Article = ArticleModel(NewsSource_id = NewsSource_id, description = description, title = title, link = link, date = date)
+        session.add(new_Article)
         session.commit()
         
-        session.refresh(new_incident)
+        #trimite_email_abonati(new_Article.title)
         
-        return new_incident 
+        session.refresh(new_Article)
+        
+        return new_Article 
     
     @strawberry.mutation
-    def update_service(self, info: Info, service_id: int, data: ServiceUpdateInput) -> Service:
+    def update_NewsSource(self, info: Info, NewsSource_id: int, data: NewsSourceUpdateInput) -> NewsSource:
         session = info.context["session"]
-        service = session.get(ServiceModel, service_id)
-        if not service:
-            raise Exception(f"Serviciul cu ID {service_id} nu a fost gasit.")
+        NewsSource = session.get(NewsSourceModel, NewsSource_id)
+        if not NewsSource:
+            raise Exception(f"Serviciul cu ID {NewsSource_id} nu a fost gasit.")
         update_data = strawberry.asdict(data)
         for key, value in update_data.items():
             if value is not None:
-                setattr(service, key, value)
+                setattr(NewsSource, key, value)
                 
-        session.add(service)
+        session.add(NewsSource)
         session.commit()
-        session.refresh(service)
+        session.refresh(NewsSource)
         
-        return service
+        return NewsSource
     
     @strawberry.mutation
-    def update_user(self, info: Info, user_id: int, data:UserUpdateInput) -> User:
+    def update_Subscriber(self, info: Info, Subscriber_id: int, data:SubscriberUpdateInput) -> Subscriber:
         session = info.context["session"]
-        user = session.get(UserModel, user_id)
+        Subscriber = session.get(SubscriberModel, Subscriber_id)
         
-        if not user:
-            raise Exception(f"Userul cu ID {user_id} nu a fost gasit.")
+        if not Subscriber:
+            raise Exception(f"Subscriberul cu ID {Subscriber_id} nu a fost gasit.")
         update_data = strawberry.asdict(data)
         for key, value in update_data.items():
             if value is not None:
-                setattr(user, key, value)
+                setattr(Subscriber, key, value)
                 
-        session.add(user)
+        session.add(Subscriber)
         session.commit()
-        session.refresh(user)
+        session.refresh(Subscriber)
         
-        return user
+        return Subscriber
         
     @strawberry.mutation
-    def update_incident(self, info:Info, incident_id: int, data: IncidentUpdateInput) -> Incident:
+    def update_Article(self, info:Info, Article_id: int, data: ArticleUpdateInput) -> Article:
         session = info.context["session"]
-        incident = session.get(IncidentModel, incident_id)
+        Article = session.get(ArticleModel, Article_id)
         
-        if not incident:
-            raise Exception(f"Incidentul cu ID {incident_id} nu a fost gasit.")
+        if not Article:
+            raise Exception(f"Articleul cu ID {Article_id} nu a fost gasit.")
         update_data = strawberry.asdict(data)
         for key, value in update_data.items():
             if value is not None:
-                setattr(incident, key, value)
+                setattr(Article, key, value)
                 
-        session.add(incident)
+        session.add(Article)
         session.commit()
-        session.refresh(incident)
+        session.refresh(Article)
         
-        return incident
+        return Article
         
     @strawberry.mutation
-    def delete_service(self, info:Info, service_id: int) -> bool:
+    def delete_NewsSource(self, info:Info, NewsSource_id: int) -> bool:
         session = info.context["session"]
         
-        service = session.get(ServiceModel, service_id)
-        if not service:
+        NewsSource = session.get(NewsSourceModel, NewsSource_id)
+        if not NewsSource:
             return False
 
-        session.delete(service)
+        session.delete(NewsSource)
 
         session.commit()
         return True
     
     @strawberry.mutation
-    def delete_user(self, info:Info, user_id: int) -> bool:
+    def delete_Subscriber(self, info:Info, Subscriber_id: int) -> bool:
         session = info.context["session"]
         
-        user = session.get(UserModel, user_id)
-        if not user:
+        Subscriber = session.get(SubscriberModel, Subscriber_id)
+        if not Subscriber:
             return False
 
-        session.delete(user)
+        session.delete(Subscriber)
 
         session.commit()
         return True
     
     @strawberry.mutation
-    def delete_incident(self, info:Info, incident_id: int) -> bool:
+    def delete_Article(self, info:Info, Article_id: int) -> bool:
         session = info.context["session"]
         
-        incident = session.get(IncidentModel, incident_id)
-        if not incident:
+        Article = session.get(ArticleModel, Article_id)
+        if not Article:
             return False
 
-        session.delete(incident)
+        session.delete(Article)
 
         session.commit()
         return True
