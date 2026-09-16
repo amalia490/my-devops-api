@@ -1,6 +1,5 @@
-from models import Service
+from models import NewsSource
 import pytest
-from pydantic import ValidationError
 from sqlmodel import SQLModel, Session, create_engine
 from schema import schema 
 
@@ -13,26 +12,30 @@ def test_db_session():
         yield session
     
 def test_graphql(test_db_session):
-    service = Service(name="Baza de date", status="active")
-    test_db_session.add(service)
+    source = NewsSource(name="Stiri Locale", url="https://stiri-locale.ro", category="Local")
+    test_db_session.add(source)
     test_db_session.commit()
-    test_db_session.refresh(service)
+    test_db_session.refresh(source)
     
     query = """
-        query getServiceTest($serviceIds: [Int!]!){
-            servicesById(serviceIds: $serviceIds){
+        query getNewsSourceTest($newsSourceId: Int!){
+            newsSourcesById(newsSourceId: $newsSourceId){
                 name
-                status
+                url
+                category
             }
         }
     """
     
     rez = schema.execute_sync(
         query,  
-        variable_values = {"serviceIds": [service.id]},
-        context_value = {"session": test_db_session}
+        variable_values = {"newsSourceId": source.id},
+        context_value = {"session": test_db_session} 
     )
+    
     assert rez.errors is None, f"Eroare GraphQL: {rez.errors}"
-    result = rez.data["servicesById"]
-    assert result[0]["name"] == "Baza de date", "Serviciul nu are acelasi nume"
-    assert result[0]["status"] == "active", "Serviciul nu are acelasi status"
+
+    result = rez.data["newsSourcesById"]
+    assert result["name"] == "Stiri Locale", "Sursa nu are acelasi nume"
+    assert result["url"] == "https://stiri-locale.ro", "Sursa nu are acelasi URL"
+    assert result["category"] == "Local", "Sursa nu are aceeasi categorie"

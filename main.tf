@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-central-1" 
+  region = "eu-central-1"
 }
 
 resource "aws_security_group" "web_sg" {
@@ -29,29 +29,29 @@ resource "aws_iam_role" "ec2_ssm_role" {
     Version = "2012-10-17"
     //reguli
     Statement = [{
-      Action = "sts:AssumeRole" //security token service 
-      Effect = "Allow" // pentru a permite actiunea de dinainte 
+      Action    = "sts:AssumeRole"                  //security token service 
+      Effect    = "Allow"                           // pentru a permite actiunea de dinainte 
       Principal = { Service = "ec2.amazonaws.com" } //cine primeste aceasta permisiune
     }]
   })
 }
 
 //adaug permisiunea de ssm 
-resource "aws_iam_role_policy_attachment" "ssm_policy_attach"{
+resource "aws_iam_role_policy_attachment" "ssm_policy_attach" {
   role = aws_iam_role.ec2_ssm_role.name
   // amazon resource name (este unic pentru fiecare obiect din aws) 
   policy_arn = "arn:aws:iam:aws::policy/AmazonSSMManagedInstanceCore"
 }
 
 //impachetare rol in instanta pentru a fi pus pe server
-resource "aws_iam_instance_profile" "ec2_ssm_profile"{
+resource "aws_iam_instance_profile" "ec2_ssm_profile" {
   name = "ec2_ssm_profile"
-  role = aws_iam_role.ec2_ssm_role.name 
+  role = aws_iam_role.ec2_ssm_role.name
 }
 
 resource "aws_instance" "web_server" {
-  ami           = "ami-04e601abe3e1a910f" 
-  instance_type = "t2.micro"          
+  ami           = "ami-04e601abe3e1a910f"
+  instance_type = "t2.micro"
 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 

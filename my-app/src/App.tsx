@@ -8,12 +8,14 @@ import { Footer} from './components/Footer';
 function App() {
   return (
     <BrowserRouter>
-    <Header/>
-      <Routes>
-        <Route path="/" element={<DashBoard />} />
-        <Route path="/canal/:idAndName" element={<ChannelPage />} />
-      </Routes>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <Header/>
+        <Routes>
+          <Route path="/" element={<DashBoard />} />
+          <Route path="/canal/:idAndName" element={<ChannelPage />} />
+        </Routes>
       <Footer lastUpdated= {new Date().toLocaleString('ro-RO')}/>
+    </div>
     </BrowserRouter>
   );
 }

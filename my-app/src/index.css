@@ -1,0 +1,16 @@
+/* Starea de bază a județului */
+.judet-interactiv {
+  outline: none; /* Scăpăm de conturul albastru enervant */
+  transition: fill 0.2s ease-in-out; /* Facem o animație fină de schimbare a culorii */
+}
+
+/* Ce se întâmplă când pui mouse-ul pe județ (Hover) */
+.judet-interactiv:hover {
+  fill: #444444; /* Un gri puțin mai deschis */
+  cursor: pointer; /* Transformăm mouse-ul într-o mânuță */
+}
+
+/* Ce se întâmplă când dai click efectiv (Pressed/Active) */
+.judet-interactiv:active {
+  fill: #222222; /* Se face mai închis la apăsare */
+}

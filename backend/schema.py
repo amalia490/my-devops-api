@@ -2,9 +2,10 @@ from collections import defaultdict
 import typing
 import strawberry
 from strawberry.types import Info
-from sqlmodel import select
+from sqlmodel import Enum, select
+import enum
 from typing import Optional
-from models import Subscriber as SubscriberModel, NewsSource as NewsSourceModel, Article as ArticleModel
+from models import Subscriber as SubscriberModel, NewsSource as NewsSourceModel, Article as ArticleModel, County as CountyModel
 from typing import List
 from strawberry.dataloader import DataLoader
 
@@ -15,6 +16,17 @@ class Subscriber:
     is_active: bool
     
 @strawberry.type
+class County:
+    id: int
+    name: str
+    latitude: float
+    longitude: float
+    
+    @strawberry.field
+    async def newsCount(self, info: Info) -> int:
+        return await info.context["Counties_loader"].load(self.id)
+    
+@strawberry.type
 class Article:
     id: int
     title: str
@@ -23,6 +35,15 @@ class Article:
     description: str
     date: str 
     
+@strawberry.enum
+class SortDirection(enum.Enum):
+    ASC = "ASC"
+    DESC = "DESC"
+
+@strawberry.input
+class ArticleOrder:
+    date: SortDirection | None = None
+
 @strawberry.type
 class NewsSource:
     id: int
@@ -32,8 +53,12 @@ class NewsSource:
     
     @strawberry.field
     #resolver pentru campul 'Articles'
-    async def Articles(self, info: Info) -> List[Article]:
-        return await info.context["Articles_loader"].load(self.id)
+    async def Articles(self, info: Info, order: ArticleOrder | None = None) -> List[Article]:
+        lista = await info.context["Articles_loader"].load(self.id)
+        if order:
+            is_desc = order.date == SortDirection.DESC 
+            lista = sorted(lista, key=lambda article : article.date or "", reverse=is_desc)
+        return lista
     
 @strawberry.input
 class NewsSourceUpdateInput:
@@ -62,6 +87,10 @@ def get_Subscriber_id(info: Info, Subscriber_id: int):
     session = info.context["session"]
     return session.get(SubscriberModel, Subscriber_id)
 
+def get_Map(info: Info):
+    session = info.context["session"]
+    return session.exec(select(CountyModel)).all()
+
 def get_NewsSource(info: Info):
     session = info.context["session"]
     return session.exec(select(NewsSourceModel)).all()
@@ -83,6 +112,7 @@ class Query:
     Subscribers: typing.List[Subscriber] = strawberry.field(resolver=get_Subscribers)
     Subscriber_by_id: Subscriber = strawberry.field(resolver=get_Subscriber_id)
     NewsSources: typing.List[NewsSource]= strawberry.field(resolver=get_NewsSource)
+    Counties: typing.List[County] = strawberry.field(resolver=get_Map)
     NewsSources_by_id: NewsSource = strawberry.field(resolver=get_NewsSources_id)
     Articles: typing.List[Article]= strawberry.field(resolver=get_Articles)
     Article_by_id: Article = strawberry.field(resolver=get_Article_id)    

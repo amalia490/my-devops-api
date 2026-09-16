@@ -6,7 +6,7 @@ export const GET_NEWS: TypedDocumentNode<NewsData, any> = gql`
       id
       name
       category
-      Articles {
+      Articles(order: { date: DESC }) {
         id
         title
         description
@@ -17,13 +17,25 @@ export const GET_NEWS: TypedDocumentNode<NewsData, any> = gql`
   }
 `;
 
+export const GET_MAP_DATA: TypedDocumentNode<MapData, any> = gql`
+  query GetMapData{
+    Counties{
+      id
+      name
+      latitude
+      longitude 
+      newsCount
+    }
+  }
+`;
+
 export const GET_CHANNEL_DETAILS: TypedDocumentNode<ChannelDetailsData, any> = gql`
   query GetChannelDetails($NewsSourceId: Int!) {
     NewsSourcesById(NewsSourceId: $NewsSourceId) { 
       id
       name
       category
-      Articles {
+      Articles(order: { date: DESC }) {
         id
         title
         description
@@ -60,10 +72,22 @@ export interface NewsSourceType {
   Articles: ArticleType[];
 }
 
+export interface CountiesType{
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  newsCount: number;
+}
+
 export interface ChannelDetailsData {
   NewsSourcesById: NewsSourceType; 
 }
 
 export interface NewsData{
     NewsSources: NewsSourceType[]
+}
+
+export interface MapData{
+  Counties: CountiesType[]
 }

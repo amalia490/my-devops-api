@@ -1,0 +1,32 @@
+/* RomaniaMap.css */
+
+.judet-interactiv {
+  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+  cursor: pointer;
+}
+
+.judet-interactiv:hover {
+  fill: #2E2568;
+  stroke: #818CF8;
+  stroke-width: 1.5px;
+}
+
+/* Pressed state equivalent */
+.judet-interactiv:active {
+  fill: #4338CA;
+}
+
+header {
+  margin-bottom: 0 !important; 
+  overflow: hidden; 
+}
+
+.container-harta {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+footer {
+  margin-top: 0 !important; 
+  overflow: hidden;
+}
